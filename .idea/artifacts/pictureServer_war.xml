@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" build-on-make="true" name="pictureServer:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="pictureServer.war">
+      <element id="artifact" artifact-name="pictureServer:war exploded" />
+    </root>
+  </artifact>
+</component>

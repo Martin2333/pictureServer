@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.topsports.pictureServer.dao.PictureMapper">
+    <sql id="condition" >
+        <if test="null!=params" >
+            <if test="null!=params.brandCode and ''!=params.brandCode" >
+                and brand_code = #{params.brandCode}
+            </if>
+            <if test="null!=params.pictureCode and ''!=params.pictureCode" >
+                and picture_code = #{params.pictureCode}
+            </if>
+            <if test="null!=params.sourceSystem and ''!=params.sourceSystem" >
+                and source_system = #{params.sourceSystem}
+            </if>
+            <if test="null!=params.pictureId and ''!=params.pictureId" >
+                and picture_id = #{params.pictureId}
+            </if>
+        </if>
+    </sql>
+
+    <resultMap id="PictureBaseMap" type="com.topsports.pictureServer.model.Picture">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="picture_id" property="pictureId" jdbcType="VARCHAR"/>
+        <result column="picture_code" property="pictureCode" jdbcType="VARCHAR"/>
+        <result column="category_name" property="categoryName" jdbcType="VARCHAR"/>
+        <result column="brand_code" property="brandCode" jdbcType="VARCHAR"/>
+        <result column="picture_type" property="pictureType" jdbcType="VARCHAR"/>
+        <result column="key_picture" property="keyPicture" jdbcType="VARCHAR"/>
+        <result column="picture_path" property="picturePath" jdbcType="VARCHAR"/>
+        <result column="format" property="format" jdbcType="VARCHAR"/>
+        <result column="picture_size" property="pictureSize" jdbcType="VARCHAR"/>
+        <result column="memory_size" property="memorySize" jdbcType="VARCHAR"/>
+        <result column="source_system" property="sourceSystem" jdbcType="VARCHAR"/>
+        <result column="enable" property="enable" jdbcType="INTEGER"></result>
+    </resultMap>
+
+    <select id="selectByParams" parameterType="java.lang.Long" resultMap="PictureBaseMap">
+        SELECT id,picture_id,picture_code,category_name,brand_code,picture_type,key_picture,picture_path,format,picture_size,memory_size,source_system,enable
+        FROM picture_path
+        WHERE enable in ( 1,2 )
+        <include refid="condition"></include>
+        ORDER BY enable ASC,id DESC
+        Limit 1
+    </select>
+    
+    <update id="deleteByParams">
+        UPDATE picture_path
+        SET enable = 0
+        WHERE 1 = 1
+        <include refid="condition"></include>
+    </update>
+
+    <select id="getLastId" resultType="java.lang.Integer" >
+        SELECT last_picture_id
+        FROM last_picture_id
+        limit 1
+    </select>
+
+    <insert id="uploadDataProImgs" parameterType="com.topsports.pictureServer.model.Picture">
+        INSERT INTO picture_path(picture_id,picture_code,category_name,brand_code,picture_path,format,source_system,upload_time)
+        VALUES (#{pictureId,jdbcType=VARCHAR},#{pictureCode,jdbcType=VARCHAR},#{categoryName,jdbcType=VARCHAR},#{brandCode,jdbcType=VARCHAR},#{picturePath,jdbcType=VARCHAR},#{format,jdbcType=VARCHAR},#{sourceSystem,jdbcType=VARCHAR},NOW())
+    </insert>
+
+    <update id="updateLastPictureId">
+        UPDATE last_picture_id
+        SET last_picture_id = ${new_id}
+    </update>
+
+    <select id="getUploadingPictures" resultMap="PictureBaseMap">
+        SELECT id,picture_id,picture_code,category_name,brand_code,picture_type,key_picture,picture_path,format,picture_size,memory_size,source_system,enable
+        FROM picture_path
+        WHERE enable = 2
+    </select>
+
+    <update id="updatePictureEnable" >
+        UPDATE picture_path
+        SET enable = ${enable}
+        WHERE picture_id = #{pictureId,jdbcType=VARCHAR}
+    </update>
+
+    <select id="getAllBrandCode" resultType="java.lang.String">
+        SELECT DISTINCT brand_code
+        FROM picture_path
+        WHERE enable = 2
+    </select>
+
+    <update id="updatePicturesEnable">
+        UPDATE picture_path
+        SET enable = 1
+        WHERE picture_path in (${picturePath})
+    </update>
+
+    <select id="getLastPictureByBrand" resultType="java.lang.String">
+        SELECT last_picture_path
+        FROM last_brand_picture_path
+        WHERE brand_code = #{brandCode}
+        limit 1
+    </select>
+
+    <update id="updateLastPictureByBrand" >
+        UPDATE last_brand_picture_path
+        SET last_picture_path = #{lastBrandPicturePath}
+        WHERE brand_code = #{brandCode}
+    </update>
+
+    <update id="updateUnablePictureStatus">
+        UPDATE picture_path
+        SET enable = 0
+        WHERE enable = 2
+        AND date(upload_time)  &lt; CURDATE();
+    </update>
+
+</mapper>
