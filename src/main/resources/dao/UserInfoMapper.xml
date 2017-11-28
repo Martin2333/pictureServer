@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.topsports.pictureServer.dao.UserInfoMapper">
+    <sql id="condition" >
+        <if test="null!=params" >
+            <if test="null!=params.userCode and ''!=params.userCode" >
+                and user_code = #{params.userCode}
+            </if>
+            <if test="null!=params.userName and ''!=params.userName" >
+                and user_name = #{params.userName}
+            </if>
+        </if>
+    </sql>
+    <resultMap id="UserInfoBaseMap" type="com.topsports.pictureServer.model.UserInfo">
+        <result column="user_code" property="userCode" jdbcType="VARCHAR"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="role" property="role" jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+    <select id="getUrlBySourceSystem" resultType="java.lang.String">
+        SELECT user_code,user_name,password,role
+        FROM base_user_info
+        WHERE enabled = 1
+        <include refid="condition"></include>
+        ORDER BY enable ASC,id DESC
+        Limit 1
+    </select>
+</mapper>
