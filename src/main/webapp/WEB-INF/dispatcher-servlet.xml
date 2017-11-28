@@ -23,14 +23,42 @@
     <mvc:resources mapping="/js/**" location="statics/js/"/>
     <mvc:resources mapping="/image/**" location="statics/image/"/>
 
-    <!-- 对模型视图名称的解析，即在模型视图名称添加前后缀(如果最后一个还是表示文件夹,则最后的斜杠不要漏了) 使用JSP-->
-    <!-- 默认的视图解析器 在上边的解析错误时使用 (默认使用html)- -->
+<!--    &lt;!&ndash; 对模型视图名称的解析，即在模型视图名称添加前后缀(如果最后一个还是表示文件夹,则最后的斜杠不要漏了) 使用JSP&ndash;&gt;
+    &lt;!&ndash; 默认的视图解析器 在上边的解析错误时使用 (默认使用html)- &ndash;&gt;
     <bean id="defaultViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
-        <property name="prefix" value="/views/"/><!--设置JSP文件的目录位置-->
+        <property name="prefix" value="/views/"/>&lt;!&ndash;设置JSP文件的目录位置&ndash;&gt;
         <property name="suffix" value=".jsp"/>
         <property name="exposeContextBeansAsAttributes" value="true"/>
+    </bean>-->
+
+    <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+        <property name="order" value="1"></property>
+        <property name="suffix" value=".ftl"></property>
+        <property name="contentType" value="text/html;charset=utf-8"></property>
+        <property name="viewClass">
+            <value>org.springframework.web.servlet.view.freemarker.FreeMarkerView</value>
+        </property>
     </bean>
+    <!--加载freemarker属性  -->
+    <bean id="propertySetting" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:/freemarker.properties</value>
+            </list>
+        </property>
+    </bean>
+    <!--freemarker配置  -->
+    <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <property name="templateLoaderPath">
+            <value>WEB-INF/ftl/</value>
+        </property>
+        <property name="freemarkerSettings" ref="propertySetting"><!-- 设置FreeMarker环境属性 -->
+
+        </property>
+    </bean>
+
+
 
     <!-- 自动扫描装配 -->
     <context:component-scan base-package="com.topsports.pictureServer.controller"/>
